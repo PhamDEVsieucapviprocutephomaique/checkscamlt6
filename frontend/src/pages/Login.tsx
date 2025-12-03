@@ -1,19 +1,17 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { ShieldAlert, Eye, EyeOff, LogIn } from "lucide-react";
+import { authAPI } from "../api/api";
 import { useAuth } from "../context/AuthContext";
-import { Mail, Lock, User, LogIn, Snowflake } from "lucide-react";
 
 const Login: React.FC = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,330 +19,196 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/auth/jwt/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          username: formData.email,
-          password: formData.password,
-        }),
-      });
+      const data = await authAPI.login(username, password);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // Lưu token
-        localStorage.setItem("access_token", data.access_token);
-
-        let userData;
-
-        try {
-          // Lấy thông tin user từ API
-          const userResponse = await fetch(
-            "http://localhost:8000/api/users/me",
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${data.access_token}`,
-              },
-            }
-          );
-
-          if (userResponse.ok) {
-            userData = await userResponse.json();
-            // 2. In user data ra console
-          } else {
-            // Fallback: tạo user data từ email
-            userData = {
-              id: "1",
-              email: formData.email,
-              role: "landlord",
-            };
-          }
-        } catch (userError) {
-          // Fallback nếu có lỗi
-          userData = {
-            id: "1",
-            email: formData.email,
-            role: "landlord",
-          };
-        }
-
-        // Gọi login
-        login(data.access_token, userData);
+      if (data.access_token && data.user) {
+        login(data.access_token, data.user);
         navigate("/");
       } else {
-        let errorMessage = "Email hoặc mật khẩu không đúng";
-
-        if (data.detail) {
-          if (typeof data.detail === "string") {
-            errorMessage = data.detail;
-          } else if (Array.isArray(data.detail)) {
-            errorMessage = data.detail
-              .map((err: any) =>
-                typeof err === "object" ? err.msg : String(err)
-              )
-              .join(", ");
-          } else if (typeof data.detail === "object") {
-            errorMessage = JSON.stringify(data.detail);
-          }
-        }
-
-        setError(errorMessage);
+        setError("Đăng nhập thất bại. Vui lòng thử lại.");
       }
-    } catch (err) {
-      console.error("Lỗi đăng nhập:", err);
-      setError("Lỗi kết nối đến server");
+    } catch (err: any) {
+      setError(err.message || "Đăng nhập thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-    if (error) setError("");
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 flex items-center justify-center p-6">
-      {/* Snowflake Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 text-blue-200/30">
-          <Snowflake size={24} />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <div className="flex justify-center">
+            <ShieldAlert className="h-12 w-12 text-red-600" />
+          </div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Đăng nhập vào CheckScam
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Hoặc{" "}
+            <Link
+              to="/register"
+              className="font-medium text-red-600 hover:text-red-500"
+            >
+              đăng ký tài khoản mới
+            </Link>
+          </p>
         </div>
-        <div className="absolute top-20 right-20 text-cyan-200/30">
-          <Snowflake size={20} />
-        </div>
-        <div className="absolute bottom-20 left-20 text-slate-200/30">
-          <Snowflake size={28} />
-        </div>
-        <div className="absolute bottom-10 right-10 text-blue-200/30">
-          <Snowflake size={22} />
-        </div>
-      </div>
 
-      <motion.div
-        className="w-full max-w-4xl bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-200/50 border border-white/60 overflow-hidden"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className="grid grid-cols-2 min-h-[600px]">
-          {/* Left Side - Branding */}
-          <div className="bg-gradient-to-br from-cyan-500 to-blue-600 p-12 flex flex-col justify-between text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
-            <div className="relative z-10">
-              <motion.div
-                className="flex items-center mb-8"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mr-4 backdrop-blur-sm">
-                  <Snowflake className="w-6 h-6" />
-                </div>
-                <span className="text-2xl font-bold">RoomFinder</span>
-              </motion.div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
 
-              <motion.h1
-                className="text-4xl font-bold mb-6 leading-tight"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Chào Mừng <br />
-                Trở Lại
-              </motion.h1>
-
-              <motion.p
-                className="text-cyan-100 text-lg leading-relaxed"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                Đăng nhập để tiếp tục hành trình tìm phòng trọ và bạn ở ghép.
-                Truy cập vào không gian cá nhân của bạn.
-              </motion.p>
+                Tên đăng nhập, email hoặc số điện thoại
+              </label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                required
+                className="input-field"
+                placeholder="Nhập username, email hoặc số điện thoại"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
             </div>
 
-            <motion.div
-              className="relative z-10"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <div className="flex items-center text-cyan-100">
-                <div className="w-2 h-2 bg-white rounded-full mr-3"></div>
-                <span className="text-sm">Kết nối an toàn</span>
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Mật khẩu
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="input-field pr-10"
+                  placeholder="Nhập mật khẩu"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
-            </motion.div>
+            </div>
           </div>
 
-          {/* Right Side - Form */}
-          <div className="p-12 flex flex-col justify-center">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-gray-900"
+              >
+                Ghi nhớ đăng nhập
+              </label>
+            </div>
+
+            <div className="text-sm">
+              <a
+                href="#"
+                className="font-medium text-red-600 hover:text-red-500"
+              >
+                Quên mật khẩu?
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <h2 className="text-3xl font-bold text-slate-800 mb-2">
-                Đăng Nhập
-              </h2>
-              <p className="text-slate-600 text-lg mb-8">
-                Nhập thông tin đăng nhập của bạn
-              </p>
+              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                <LogIn className="h-5 w-5 text-red-500 group-hover:text-red-400" />
+              </span>
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+            </button>
+          </div>
 
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl"
-                  >
-                    <p className="text-red-600 text-sm">{error}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Bằng việc đăng nhập, bạn đồng ý với{" "}
+              <Link to="/terms" className="text-red-600 hover:text-red-500">
+                Điều khoản sử dụng
+              </Link>{" "}
+              và{" "}
+              <Link to="/privacy" className="text-red-600 hover:text-red-500">
+                Chính sách bảo mật
+              </Link>
+            </p>
+          </div>
+        </form>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-4">
-                  {/* Email */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Địa chỉ email
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition duration-300 text-slate-800 placeholder-slate-400 text-lg"
-                        placeholder="you@example.com"
-                        required
-                        disabled={loading}
-                      />
-                      <Mail className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    </div>
-                  </div>
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-50 text-gray-500">
+                Hoặc tiếp tục với
+              </span>
+            </div>
+          </div>
 
-                  {/* Password */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Mật khẩu
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition duration-300 text-slate-800 placeholder-slate-400 text-lg pr-12"
-                        placeholder="••••••••"
-                        required
-                        disabled={loading}
-                      />
-                      <Lock className="absolute right-12 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition duration-200"
-                      >
-                        {showPassword ? (
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <span className="sr-only">Đăng nhập với Google</span>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+              </svg>
+              Google
+            </button>
 
-                {/* Submit Button */}
-                <motion.button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-4 px-8 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 disabled:from-slate-400 disabled:to-slate-500 text-white font-semibold rounded-2xl text-lg transition duration-300 shadow-lg shadow-cyan-200 flex items-center justify-center"
-                  whileHover={{ scale: loading ? 1 : 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {loading ? (
-                    <motion.span
-                      className="flex items-center"
-                      animate={{ opacity: [0.5, 1, 0.5] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                        className="w-6 h-6 border-2 border-white border-t-transparent rounded-full mr-3"
-                      />
-                      Đang đăng nhập...
-                    </motion.span>
-                  ) : (
-                    <span className="flex items-center text-xl">
-                      <LogIn className="w-6 h-6 mr-3" />
-                      Đăng Nhập
-                    </span>
-                  )}
-                </motion.button>
-              </form>
-
-              <div className="mt-8 pt-6 border-t border-slate-200">
-                <p className="text-center text-slate-600 text-lg">
-                  Chưa có tài khoản?{" "}
-                  <Link
-                    to="/register"
-                    className="text-cyan-600 hover:text-cyan-700 font-semibold hover:underline transition duration-200"
-                  >
-                    Đăng ký ngay
-                  </Link>
-                </p>
-              </div>
-            </motion.div>
+            <button
+              type="button"
+              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <span className="sr-only">Đăng nhập với Facebook</span>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  fillRule="evenodd"
+                  d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Facebook
+            </button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

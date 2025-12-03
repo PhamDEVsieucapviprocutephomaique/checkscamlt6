@@ -1,10 +1,17 @@
-elasticsearch==8.11.1
 fastapi==0.120.0
-fastapi_users==15.0.1
-SQLAlchemy==2.0.44
-sqlmodel==0.0.27
 uvicorn[standard]==0.29.0
-psycopg2-binary  
-asyncpg  
-fastapi-users[sqlalchemy] 
-pytest>=7.0.0
+sqlalchemy==2.0.44
+mysql-connector-python==8.3.0
+pymysql==1.1.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+pydantic==2.7.0
+python-dotenv==1.0.1
+elasticsearch==8.11.1  # Thêm Elasticsearch
+pillow==10.3.0
+ftplib==0.8.0
+aiofiles==23.2.1
+pandas==2.2.2
+redis==5.0.3
+celery==5.3.6

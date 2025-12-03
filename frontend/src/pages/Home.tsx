@@ -1,232 +1,348 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import {
+  Search,
+  AlertTriangle,
+  Users,
+  Shield,
+  TrendingUp,
+  Clock,
+  Eye,
+  MessageSquare,
+} from "lucide-react";
 
 const Home: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [todayWarnings, setTodayWarnings] = useState<any[]>([]);
+  const [topScammers, setTopScammers] = useState<any[]>([]);
+  const [topSearches, setTopSearches] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    totalWarnings: 0,
+    totalViews: 0,
+    totalReports: 0,
+  });
+
+  // Mock data - Thay bằng API call thực tế
+  useEffect(() => {
+    // TODO: Gọi API thực tế
+    setTodayWarnings([
+      {
+        id: 1,
+        title: "Nguyễn Tiến D - Fake bảo hiểm ảo lừa đảo",
+        scammer_name: "Nguyễn Tiến D",
+        view_count: 222,
+        created_at: new Date(),
+      },
+      {
+        id: 2,
+        title: "Lừa đảo mua bán acc Free Fire",
+        scammer_name: "Trần Văn A",
+        view_count: 150,
+        created_at: new Date(),
+      },
+      {
+        id: 3,
+        title: "Scam đầu tư tiền ảo Ponzi",
+        scammer_name: "Lê Thị B",
+        view_count: 89,
+        created_at: new Date(),
+      },
+    ]);
+
+    setTopScammers([
+      { scammer_name: "084877393", warning_count: 3 },
+      { scammer_name: "962NPS0211389380930", warning_count: 3 },
+      { scammer_name: "0471014198888", warning_count: 2 },
+      { scammer_name: "0789384972", warning_count: 2 },
+      { scammer_name: "082991666", warning_count: 2 },
+    ]);
+
+    setTopSearches([
+      { query: "40400792914617", search_count: 266 },
+      { query: "0367268228", search_count: 19 },
+      { query: "0326070092", search_count: 15 },
+    ]);
+
+    setStats({
+      totalWarnings: 1245,
+      totalViews: 125678,
+      totalReports: 567,
+    });
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Tìm Bạn Ở Ghép &
-              <span className="block text-yellow-300">Phòng Trọ Lý Tưởng</span>
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-blue-100">
-              Kết nối sinh viên tìm bạn ở ghép và chủ trọ tìm người thuê phù hợp
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
-              <Link
-                to="/find-roommate"
-                className="bg-yellow-400 text-blue-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-300 transform hover:scale-105 transition duration-300 shadow-lg"
+      <div className="relative bg-gradient-to-r from-red-600 to-red-800 text-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Bảo vệ bạn khỏi lừa đảo trực tuyến
+          </h1>
+          <p className="text-xl mb-8 max-w-3xl mx-auto">
+            Tìm kiếm, cảnh báo và chia sẻ thông tin về các hình thức lừa đảo.
+            Cùng nhau xây dựng cộng đồng an toàn.
+          </p>
+
+          <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-6 w-6" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm số điện thoại, số tài khoản, link Facebook, tên..."
+                className="w-full pl-12 pr-4 py-4 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-red-700 hover:bg-red-800 text-white px-6 py-2 rounded-lg"
               >
-                🎯 Tìm Bạn Ở Ghép
-              </Link>
-              <Link
-                to="/find-room"
-                className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transform hover:scale-105 transition duration-300 shadow-lg"
+                Tìm kiếm
+              </button>
+            </div>
+            <div className="mt-4 text-sm">
+              <span className="text-red-200">Ví dụ: </span>
+              <button
+                type="button"
+                onClick={() => setSearchQuery("084877393")}
+                className="text-red-200 hover:text-white mx-2"
               >
-                🏠 Tìm Phòng Trọ
-              </Link>
+                084877393
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchQuery("nguyễn tiến d")}
+                className="text-red-200 hover:text-white mx-2"
+              >
+                nguyễn tiến d
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchQuery("707***378")}
+                className="text-red-200 hover:text-white mx-2"
+              >
+                707***378
+              </button>
             </div>
-          </div>
+          </form>
         </div>
-
-        {/* Wave Divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg
-            viewBox="0 0 1200 120"
-            preserveAspectRatio="none"
-            className="fill-current text-white"
-          >
-            <path
-              d="M1200 120L0 16.48 0 0 1200 0 1200 120z"
-              className="shape-fill"
-            ></path>
-          </svg>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Tại Sao Chọn Chúng Tôi?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Nền tảng kết nối hàng đầu dành cho sinh viên tìm bạn ở ghép và
-              phòng trọ
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 hover:shadow-xl transition duration-300">
-              <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl">🤝</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Matching Thông Minh
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Thuật toán AI tìm người ở ghép phù hợp với tính cách, thói quen
-                và sở thích của bạn
-              </p>
-            </div>
-
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-xl transition duration-300">
-              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl">🏡</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Đa Dạng Lựa Chọn
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Hàng ngàn phòng trọ với đầy đủ thông tin, hình ảnh thực tế và
-                đánh giá chân thực
-              </p>
-            </div>
-
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 hover:shadow-xl transition duration-300">
-              <div className="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl">💰</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Tiết Kiệm Tối Đa
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Ở ghép giúp tiết kiệm chi phí, kết nối bạn bè và tạo cộng đồng
-                sinh viên thân thiện
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      </div>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-gray-900 to-blue-900 text-white">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-yellow-400 mb-2">
-                10,000+
-              </div>
-              <div className="text-blue-200">Thành Viên</div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <h3 className="text-3xl font-bold text-gray-900">
+                {stats.totalWarnings.toLocaleString()}
+              </h3>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-yellow-400 mb-2">
-                5,000+
-              </div>
-              <div className="text-blue-200">Phòng Trọ</div>
+            <p className="text-gray-600">Cảnh báo lừa đảo</p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <Eye className="h-8 w-8 text-blue-600" />
+              <h3 className="text-3xl font-bold text-gray-900">
+                {stats.totalViews.toLocaleString()}
+              </h3>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-yellow-400 mb-2">
-                2,000+
-              </div>
-              <div className="text-blue-200">Match Thành Công</div>
+            <p className="text-gray-600">Lượt xem</p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <Users className="h-8 w-8 text-green-600" />
+              <h3 className="text-3xl font-bold text-gray-900">
+                {stats.totalReports.toLocaleString()}
+              </h3>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-yellow-400 mb-2">50+</div>
-              <div className="text-blue-200">Trường Đại Học</div>
-            </div>
+            <p className="text-gray-600">Báo cáo từ cộng đồng</p>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Sẵn Sàng Tìm Kiếm?
-            </h2>
-            <p className="text-xl text-gray-600 mb-8">
-              Tham gia cộng đồng hàng nghìn sinh viên đang tìm kiếm bạn ở ghép
-              và phòng trọ phù hợp
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Today Warnings */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="bg-red-600 text-white px-6 py-4">
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-5 w-5" />
+                  <h2 className="text-xl font-bold">CẢNH BÁO HÔM NAY</h2>
+                </div>
+              </div>
+
+              <div className="divide-y">
+                {todayWarnings.map((warning) => (
+                  <Link
+                    key={warning.id}
+                    to={`/warning/${warning.id}`}
+                    className="block p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-900 mb-2">
+                          {warning.title}
+                        </h3>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600">
+                          <span>Chủ tk: {warning.scammer_name}</span>
+                          <span className="flex items-center">
+                            <Eye className="h-4 w-4 mr-1" />
+                            {warning.view_count} lượt xem
+                          </span>
+                          <span>
+                            {new Date(warning.created_at).toLocaleDateString(
+                              "vi-VN"
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <AlertTriangle className="h-6 w-6 text-red-500 flex-shrink-0" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="p-6 border-t">
+                <Link
+                  to="/warnings"
+                  className="text-red-600 hover:text-red-700 font-medium"
+                >
+                  Xem tất cả cảnh báo →
+                </Link>
+              </div>
+            </div>
+
+            {/* Report CTA */}
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-lg p-8 mt-8 text-center">
+              <Shield className="h-12 w-12 text-white mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-white mb-2">
+                Bạn bị lừa đảo?
+              </h3>
+              <p className="text-white mb-6">
+                Hãy tố cáo để cảnh báo cộng đồng!
+              </p>
               <Link
-                to="/register"
-                className="bg-blue-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-700 transform hover:scale-105 transition duration-300 shadow-lg"
+                to="/report"
+                className="bg-white text-red-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 inline-block"
               >
-                Đăng Ký Ngay
-              </Link>
-              <Link
-                to="/find-room"
-                className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transform hover:scale-105 transition duration-300"
-              >
-                Khám Phá Phòng Trọ
+                TỐ CÁO NGAY
               </Link>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Testimonials */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Câu Chuyện Thành Công
-            </h2>
-            <p className="text-xl text-gray-600">
-              Những trải nghiệm thực tế từ cộng đồng của chúng tôi
-            </p>
+          {/* Right Column - Statistics */}
+          <div className="space-y-8">
+            {/* Top Scammers */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="bg-gray-900 text-white px-6 py-4">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <h2 className="text-xl font-bold">LỪA ĐẢO PHỔ BIẾN 7 NGÀY</h2>
+                </div>
+              </div>
+
+              <div className="divide-y">
+                {topScammers.map((scammer, index) => (
+                  <div key={index} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-bold ${
+                              index < 3
+                                ? "bg-red-100 text-red-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            Top {index + 1}
+                          </span>
+                          <span className="font-medium">
+                            {scammer.scammer_name}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          {scammer.warning_count} bài cảnh báo
+                        </div>
+                      </div>
+                      <AlertTriangle className="h-5 w-5 text-red-500" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Top Searches */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="bg-blue-600 text-white px-6 py-4">
+                <div className="flex items-center space-x-2">
+                  <Search className="h-5 w-5" />
+                  <h2 className="text-xl font-bold">TOP TÌM KIẾM NGÀY</h2>
+                </div>
+              </div>
+
+              <div className="divide-y">
+                {topSearches.map((search, index) => (
+                  <Link
+                    key={index}
+                    to={`/search?q=${encodeURIComponent(search.query)}`}
+                    className="block p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-gray-500">{index + 1}.</span>
+                        <span className="font-medium">{search.query}</span>
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        {search.search_count} lượt
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="font-bold text-lg mb-4">Hành động nhanh</h3>
+              <div className="space-y-3">
+                <Link
+                  to="/report"
+                  className="flex items-center justify-between p-3 bg-red-50 text-red-700 rounded-lg hover:bg-red-100"
+                >
+                  <span className="font-medium">Gửi tố cáo mới</span>
+                  <AlertTriangle className="h-5 w-5" />
+                </Link>
+                <Link
+                  to="/admins"
+                  className="flex items-center justify-between p-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100"
+                >
+                  <span className="font-medium">Danh sách Admin</span>
+                  <Users className="h-5 w-5" />
+                </Link>
+                <Link
+                  to="/warnings"
+                  className="flex items-center justify-between p-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100"
+                >
+                  <span className="font-medium">Xem tất cả cảnh báo</span>
+                  <MessageSquare className="h-5 w-5" />
+                </Link>
+              </div>
+            </div>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                  TL
-                </div>
-                <div>
-                  <div className="font-semibold">Trần Linh</div>
-                  <div className="text-yellow-400">★★★★★</div>
-                </div>
-              </div>
-              <p className="text-gray-600 italic">
-                "Nhờ platform này mình đã tìm được 2 bạn ở ghép cực kỳ hợp tính.
-                Chúng mình không chỉ là bạn cùng phòng mà còn là những người bạn
-                thân thiết!"
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                  MN
-                </div>
-                <div>
-                  <div className="font-semibold">Minh Nhật</div>
-                  <div className="text-yellow-400">★★★★★</div>
-                </div>
-              </div>
-              <p className="text-gray-600 italic">
-                "Phòng trọ mình tìm được qua đây rất đẹp và đúng với mô tả. Chủ
-                trọ rất nhiệt tình và khu vực an ninh tốt. Rất hài lòng!"
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                  HA
-                </div>
-                <div>
-                  <div className="font-semibold">Hà Anh</div>
-                  <div className="text-yellow-400">★★★★☆</div>
-                </div>
-              </div>
-              <p className="text-gray-600 italic">
-                "Tính năng matching giúp mình tìm được bạn ở ghép có cùng lịch
-                sinh hoạt và sở thích. Tiết kiệm được rất nhiều thời gian tìm
-                kiếm!"
-              </p>
-            </div>
-          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 };

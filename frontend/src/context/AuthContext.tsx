@@ -1,9 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 interface User {
-  id: string;
+  id: number;
+  username: string;
   email: string;
+  phone: string;
   role: string;
+  full_name: string;
+  avatar_url: string;
+  zalo_contact?: string;
+  is_active?: boolean;
+  is_verified?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  last_login?: string;
 }
 
 interface AuthContextType {
@@ -11,6 +21,7 @@ interface AuthContextType {
   login: (token: string, userData: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Kiểm tra token và user trong localStorage khi component mount
@@ -33,6 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         logout();
       }
     }
+    setIsLoading(false);
   }, []);
 
   const login = (token: string, userData: User) => {
@@ -45,12 +58,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
     setUser(null);
+    window.location.href = "/";
   };
 
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isAuthenticated, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );
